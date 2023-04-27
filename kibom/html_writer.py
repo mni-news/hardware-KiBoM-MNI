@@ -52,9 +52,14 @@ def WriteHTML(filename, groups, net, headings, head_names, prefs):
     nFitted = sum([g.getCount() for g in groups if g.isFitted()])
     nBuild = nFitted * prefs.boards
 
+    link_datasheet = prefs.as_link
     link_digikey = None
     if prefs.digikey_link:
         link_digikey = prefs.digikey_link.split("\t")
+
+    link_mouser = None
+    if prefs.mouser_link:
+        link_mouser = prefs.mouser_link.split("\t")
 
     with open(filename, "w") as html:
 
@@ -128,7 +133,18 @@ def WriteHTML(filename, groups, net, headings, head_names, prefs):
 
             for n, r in enumerate(row):
                 if link_digikey and headings[n] in link_digikey:
-                    r = '<a href="http://search.digikey.com/scripts/DkSearch/dksus.dll?Detail&name=' + r + '">' + r + '</a>'
+                    r = '<a href="https://www.digikey.com/en/products?mpart=' + r + '">' + r + '</a>'
+
+                if link_mouser and headings[n] in link_mouser:
+                    r = '<a href="https://www.mouser.com/ProductDetail/' + r + '">' + r + '</a>'
+
+                # Link this column to the datasheet?
+                if link_datasheet and headings[n] == link_datasheet:
+                    r = '<a href="' + group.getField(ColumnList.COL_DATASHEET) + '">' + r + '</a>'
+
+                # Link this column to the datasheet?
+                if link_datasheet and headings[n] == link_datasheet:
+                    r = '<a href="' + group.getField(ColumnList.COL_DATASHEET) + '">' + r + '</a>'
 
                 if (len(r) == 0) or (r.strip() == "~"):
                     bg = BG_EMPTY
@@ -173,10 +189,18 @@ def WriteHTML(filename, groups, net, headings, head_names, prefs):
                     html.write('\t<td align="center">{n}</td>\n'.format(n=rowCount))
  
                 for n, r in enumerate(row):
-                    if link_digikey and headings[n] in link_digikey:
-                        r = '<a href="http://search.digikey.com/scripts/DkSearch/dksus.dll?Detail&name=' + r + '">' + r + '</a>'
 
-                    if len(r) == 0:
+                    # Link this column to the datasheet?
+                    if link_datasheet and headings[n] == link_datasheet:
+                        r = '<a href="' + group.getField(ColumnList.COL_DATASHEET) + '">' + r + '</a>'
+
+                    if link_digikey and headings[n] in link_digikey:
+                        r = '<a href="https://www.digikey.com/en/products?mpart=' + r + '">' + r + '</a>'
+
+                    if link_mouser and headings[n] in link_mouser:
+                        r = '<a href="https://www.mouser.com/ProductDetail/' + r + '">' + r + '</a>'
+
+                    if (len(r) == 0) or (r.strip() == "~"):
                         bg = BG_EMPTY
                     else:
                         bg = bgColor(headings[n])
